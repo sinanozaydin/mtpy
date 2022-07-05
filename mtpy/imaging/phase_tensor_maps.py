@@ -292,8 +292,8 @@ class PlotPhaseTensorMaps(mtpl.PlotSettings):
     :Example: ::
 
         >>> #change the axis label and grid color
-        >>> ptmap.ax.set_xlabel('Latitude (deg)')
-        >>> ptmap.ax.grid(which='major', color=(.5,1,0))
+        >>> ptmap.lpax.set_xlabel('Latitude (deg)')
+        >>> ptmap.lpax.grid(which='major', color=(.5,1,0))
         >>> ptmap.update_plot()
 
     Attributes:
