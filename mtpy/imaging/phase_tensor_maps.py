@@ -251,6 +251,17 @@ class PlotPhaseTensorMaps(mtpl.PlotSettings):
                         size of the font that labels the plot, 2 will be added
                         to this number for the axis labels.
 
+        **plot_grid**: boolean
+                       True of False to whether plot the grids.
+
+        **grid_dict** : dictionary
+                        * 'size' --> grid size in float
+                        * 'linestyle' --> linestyle of the gridlines in str
+                        * 'type' --> grid type in str
+                        * 'alpha' --> grid alpha in float 0 to 1
+                                    0 being completely transparent
+                                    1 being opaque
+                        * 'color' --> color in various formats
 
         **station_dict** : dictionary
                            font dictionary for station name. Keys can be
@@ -451,6 +462,16 @@ class PlotPhaseTensorMaps(mtpl.PlotSettings):
 
         self.font_size = kwargs.pop('font_size', 7)
 
+        self.plot_grid = kwargs.pop('plot_grid', True)
+
+        self.grid_dict = kwargs.pop('grid_dict', None)
+        if self.grid_dict is not None:
+            self.grid_color = self.grid_dict.pop('color', '#000000')
+            self.grid_type = self.grid_dict.pop('type', 'both')
+            self.grid_size = self.grid_dict.pop('size', 0.5)
+            self.grid_alpha = self.grid_dict.pop('alpha', 0.5)
+            self.grid_linestyle = self.grid_dict.pop('linestyle', '-')
+
         self.ref_ax_loc = kwargs.pop('ref_ax_loc', (.85, .1, .1, .1))
         # if rotation angle is an int or float make an array the length of
         # mt_list for plotting purposes
@@ -620,14 +641,14 @@ class PlotPhaseTensorMaps(mtpl.PlotSettings):
             else:
                 vals = np.array(raster_dict['vals'])
 
-            
+
 
             lons -= refpoint[0]
             lats -= refpoint[1]
             levels = raster_dict.pop('levels', 50)
             cmap = raster_dict.pop('cmap', 'rainbow')
             cbar_title = raster_dict.pop('cbar_title', 'Arbitrary Units')
-            
+
             # if a 2D array provided, can use contourf and no need to triangulate
             triangulate = True
             if len(vals.shape) > 1:
@@ -646,7 +667,7 @@ class PlotPhaseTensorMaps(mtpl.PlotSettings):
                 cbinfo = lpax.contourf(lons,lats,vals,
                                        levels=np.linspace(vals.min(), vals.max(), levels),
                                           cmap=cmap)
-                
+
             if raster_dict['cbar_position'] is not None:
                 cbax = self.fig.add_axes(raster_dict['cbar_position'])
             else:
@@ -1087,7 +1108,14 @@ class PlotPhaseTensorMaps(mtpl.PlotSettings):
         # END: if self.plot_tipper.find('yes') == 0 ---------------------------
 
         # make a grid with color lines
-        lpax.grid(True, alpha=.3, which='both', color=(0.5, 0.5, 0.5))
+        if self.plot_grid == True:
+            if self.grid_dict is not None:
+                lpax.grid(True, alpha= self.grid_alpha, which = self.grid_type, color = self.grid_color,linewidth = self.grid_size, linestyle = self.grid_linestyle)
+            else:
+                lpax.grid(True, alpha=.5, which='both', color=(0.5, 0.5, 0.5), linewidth = 0.5, linestyle = '-')
+
+            lpax.set_axisbelow(True)
+
         if self.minorticks_on:
             plt.minorticks_on()  # turn on minor ticks automatically
 
