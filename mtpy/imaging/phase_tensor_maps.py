@@ -70,53 +70,52 @@ class PlotPhaseTensorMaps(mtpl.PlotSettings):
                    flag to indicate whether to interpolate values on to plot_freq.
                    *default* in True
 
-        **ellipse_dict** : dictionary
-                          dictionary of parameters for the phase tensor
-                          ellipses with keys:
-                              * 'size' -> size of ellipse in points
-                                         *default* is 2
+        **ellipse_size** : float
+                        -> size of ellipse in points
+                                   *default* is 2
 
-                              * 'colorby' : [ 'phimin' | 'phimax' | 'skew' |
-                                              'skew_seg' | 'phidet' |
-                                              'ellipticity' ]
+        **ellipse_colorby** : string
+                            [ 'phimin' | 'phimax' | 'skew' |
+                                            'skew_seg' | 'phidet' |
+                                            'ellipticity' ]
+                            - 'phimin' -> colors by minimum phase
+                            - 'phimax' -> colors by maximum phase
+                            - 'skew' -> colors by skew
+                            - 'skew_seg' -> colors by skew in
+                                           discrete segments
+                                           defined by the range
+                            - 'normalized_skew' -> colors by skew
+                                    see [Booker, 2014]
+                            - 'normalized_skew_seg' -> colors by
+                                           normalized skew in
+                                           discrete segments
+                                           defined by the range
+                            - 'phidet' -> colors by determinant of
+                                         the phase tensor
+                            - 'ellipticity' -> colors by ellipticity
+                            *default* is 'phimin'
 
-                                        - 'phimin' -> colors by minimum phase
-                                        - 'phimax' -> colors by maximum phase
-                                        - 'skew' -> colors by skew
-                                        - 'skew_seg' -> colors by skew in
-                                                       discrete segments
-                                                       defined by the range
-                                        - 'normalized_skew' -> colors by skew
-                                                see [Booker, 2014]
-                                        - 'normalized_skew_seg' -> colors by
-                                                       normalized skew in
-                                                       discrete segments
-                                                       defined by the range
-                                        - 'phidet' -> colors by determinant of
-                                                     the phase tensor
-                                        - 'ellipticity' -> colors by ellipticity
-                                        *default* is 'phimin'
+        **ellipse_range** : list [min,max,step]
+                            Need to input at least the min and max
+                            and if using 'skew_seg' to plot
+                            discrete values input step as well
+                            *default* depends on 'colorby'
 
-                               * 'range' : tuple (min, max, step)
-                                     Need to input at least the min and max
-                                     and if using 'skew_seg' to plot
-                                     discrete values input step as well
-                                     *default* depends on 'colorby'
+        **ellipse_cmap** : string
+                        [ 'mt_yl2rd' | 'mt_bl2yl2rd' |
+                                    'mt_wh2bl' | 'mt_rd2bl' |
+                                    'mt_bl2wh2rd' | 'mt_seg_bl2wh2rd' |
+                                    'mt_rd2gr2bl' ]
 
-                          * 'cmap' : [ 'mt_yl2rd' | 'mt_bl2yl2rd' |
-                                      'mt_wh2bl' | 'mt_rd2bl' |
-                                      'mt_bl2wh2rd' | 'mt_seg_bl2wh2rd' |
-                                      'mt_rd2gr2bl' ]
-
-                                   - 'mt_yl2rd' -> yellow to red
-                                   - 'mt_bl2yl2rd' -> blue to yellow to red
-                                   - 'mt_wh2bl' -> white to blue
-                                   - 'mt_rd2bl' -> red to blue
-                                   - 'mt_bl2wh2rd' -> blue to white to red
-                                   - 'mt_bl2gr2rd' -> blue to green to red
-                                   - 'mt_rd2gr2bl' -> red to green to blue
-                                   - 'mt_seg_bl2wh2rd' -> discrete blue to
-                                                         white to red
+                                 - 'mt_yl2rd' -> yellow to red
+                                 - 'mt_bl2yl2rd' -> blue to yellow to red
+                                 - 'mt_wh2bl' -> white to blue
+                                 - 'mt_rd2bl' -> red to blue
+                                 - 'mt_bl2wh2rd' -> blue to white to red
+                                 - 'mt_bl2gr2rd' -> blue to green to red
+                                 - 'mt_rd2gr2bl' -> red to green to blue
+                                 - 'mt_seg_bl2wh2rd' -> discrete blue to
+                                                       white to red
 
 
         **cb_dict** : dictionary to control the color bar
@@ -701,7 +700,7 @@ class PlotPhaseTensorMaps(mtpl.PlotSettings):
             if cmap == 'mt_seg_bl2wh2rd':
                 raise ValueError('Need to input range as (min, max, step)')
             else:
-                ckstep = 3
+                ckstep = 1
         nseg = float((ckmax - ckmin) / (2 * ckstep))
         ck = self.ellipse_colorby
 
