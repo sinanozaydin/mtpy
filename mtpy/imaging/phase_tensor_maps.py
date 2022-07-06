@@ -673,6 +673,7 @@ class PlotPhaseTensorMaps(mtpl.PlotSettings):
                 cbax, kw = mcb.make_axes(lpax,
                                          orientation=self.cb_orientation,
                                          shrink=.35)
+
             cbar = lpfig.colorbar(cbinfo, cbax)
 
             if(self.cb_orientation == 'horizontal'):
@@ -681,7 +682,7 @@ class PlotPhaseTensorMaps(mtpl.PlotSettings):
                 cbar.ax.xaxis.set_label_coords(.5, 1.3)
             else:
                 cbar.ax.set_ylabel(cbar_title, fontsize=self.font_size,
-                                   fontweight='bold')
+                                   fontweight= 'normal')
                 cbar.ax.yaxis.set_label_position('right')
                 cbar.ax.yaxis.set_label_coords(1.25, .5)
                 cbar.ax.yaxis.tick_left()
@@ -1169,7 +1170,9 @@ class PlotPhaseTensorMaps(mtpl.PlotSettings):
 
         # label the color bar accordingly
         self.cb.set_label(mtpl.ckdict[ck],
-                          fontdict={'size': self.font_size, 'weight': 'bold'})
+                          fontdict={'size': self.font_size})
+
+        self.cb.outline.set_linewidth(0.5)
 
         # place the label in the correct location
         if self.cb_orientation == 'horizontal':
