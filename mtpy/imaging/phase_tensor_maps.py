@@ -281,7 +281,21 @@ class PlotPhaseTensorMaps(mtpl.PlotSettings):
                                                legend text
                                * 'fontdict'  -> dictionary of font properties
 
+        **transparent_backgr**: boolean
+                                True: Transparent axes background
+                                False: Default axes background
 
+        **axes_off**: boolean
+                    True: get rid of the axes
+                    False: Same
+
+        **title_off**: boolean
+                    True: get rid of the axes
+                    False: Same
+
+        **colorbar_off**: boolean
+            True: get rid of the axes
+            False: Same
 
         **reference_point** : tuple (x0,y0)
                               reference point estimate relative distance to.
@@ -401,6 +415,11 @@ class PlotPhaseTensorMaps(mtpl.PlotSettings):
         self.background_image = kwargs.pop('background_image', None)
         self.bimg_band = kwargs.pop('bimg_band', None)
         self.bimg_cmap = kwargs.pop('bimg_cmap', 'viridis')
+
+        self.transparent_backgr = kwargs.pop('transparent_backgr', False)
+        self.axes_off = kwargs.pop('axes_off', False)
+        self.title_off = kwargs.pop('title_off', False)
+        self.colorbar_off = kwargs.pop('colorbar_off', False)
 
         # --> set the ellipse properties -------------------
         # set default size to 2
@@ -1022,8 +1041,9 @@ class PlotPhaseTensorMaps(mtpl.PlotSettings):
             titlefreq = '{0:.5g} (Hz)'.format(self.plot_freq)
 
         if not self.plot_title:
-            lpax.set_title('Phase Tensor Map for ' + titlefreq,
-                           fontsize=self.font_size + 2, fontweight='bold')
+            if self.title_off == False:
+                lpax.set_title('Phase Tensor Map for ' + titlefreq,
+                               fontsize=self.font_size + 2, fontweight='bold')
         else:
             lpax.set_title(self.plot_title + titlefreq,
                            fontsize=self.font_size + 2, fontweight='bold')
@@ -1116,74 +1136,79 @@ class PlotPhaseTensorMaps(mtpl.PlotSettings):
 
             lpax.set_axisbelow(True)
 
+        if self.axes_off == True:
+            lpax.axis('off')
+
         if self.minorticks_on:
             plt.minorticks_on()  # turn on minor ticks automatically
 
         # ==> make a colorbar with appropriate colors
-        if self.cb_position is None:
-            lpax2, kw = mcb.make_axes(lpax,
-                                      orientation=self.cb_orientation,
-                                      shrink=.35)
-            # FZ: try to fix colorbar h-position
-            # from mpl_toolkits.axes_grid1 import make_axes_locatable
-            #
-            # # create an axes on the right side of ax. The width of cax will be 5%
-            # # of ax and the padding between cax and ax will be fixed at 0.05 inch.
-            # divider = make_axes_locatable(self.ax)
-            # self.ax2 = divider.append_axes("right", size="5%", pad=0.05)
+        if self.colorbar_off == False:
 
-        else:
-            lpax2 = lpfig.add_axes(self.cb_position)
+            if self.cb_position is None:
+                lpax2, kw = mcb.make_axes(lpax,
+                                          orientation=self.cb_orientation,
+                                          shrink=.35)
+                # FZ: try to fix colorbar h-position
+                # from mpl_toolkits.axes_grid1 import make_axes_locatable
+                #
+                # # create an axes on the right side of ax. The width of cax will be 5%
+                # # of ax and the padding between cax and ax will be fixed at 0.05 inch.
+                # divider = make_axes_locatable(self.ax)
+                # self.ax2 = divider.append_axes("right", size="5%", pad=0.05)
 
-        if cmap == 'mt_seg_bl2wh2rd':
-            # make a color list
-            self.clist = [(cc, cc, 1)
-                          for cc in np.arange(0, 1 + 1. / (nseg), 1. / (nseg))] + \
-                         [(1, cc, cc)
-                          for cc in np.arange(1, -1. / (nseg), -1. / (nseg))]
-
-            # make segmented colormap
-            mt_seg_bl2wh2rd = colors.ListedColormap(self.clist)
-
-            # make bounds so that the middle is white
-            bounds = np.arange(ckmin - ckstep, ckmax + 2 * ckstep, ckstep)
-
-            # normalize the colors
-            norms = colors.BoundaryNorm(bounds, mt_seg_bl2wh2rd.N)
-
-            # make the colorbar
-            self.cb = mcb.ColorbarBase(lpax2,
-                                       cmap=mt_seg_bl2wh2rd,
-                                       norm=norms,
-                                       orientation=self.cb_orientation,
-                                       ticks=bounds[1:-1])
-        else:
-            if cmap in list(mtcl.cmapdict.keys()):
-                cmap_input = mtcl.cmapdict[cmap]
             else:
-                cmap_input = mtcl.cm.get_cmap(cmap)
-            self.cb = mcb.ColorbarBase(lpax2,
-                                       cmap=cmap_input,  # mtcl.cmapdict[cmap],
-                                       norm=colors.Normalize(vmin=ckmin,
-                                                             vmax=ckmax),
-                                       orientation=self.cb_orientation)
+                lpax2 = lpfig.add_axes(self.cb_position)
 
-        # label the color bar accordingly
-        self.cb.set_label(mtpl.ckdict[ck],
-                          fontdict={'size': self.font_size})
+            if cmap == 'mt_seg_bl2wh2rd':
+                # make a color list
+                self.clist = [(cc, cc, 1)
+                              for cc in np.arange(0, 1 + 1. / (nseg), 1. / (nseg))] + \
+                             [(1, cc, cc)
+                              for cc in np.arange(1, -1. / (nseg), -1. / (nseg))]
 
-        self.cb.outline.set_linewidth(0.5)
+                # make segmented colormap
+                mt_seg_bl2wh2rd = colors.ListedColormap(self.clist)
 
-        # place the label in the correct location
-        if self.cb_orientation == 'horizontal':
-            self.cb.ax.xaxis.set_label_position('top')
-            self.cb.ax.xaxis.set_label_coords(.5, 1.3)
+                # make bounds so that the middle is white
+                bounds = np.arange(ckmin - ckstep, ckmax + 2 * ckstep, ckstep)
 
-        elif self.cb_orientation == 'vertical':
-            self.cb.ax.yaxis.set_label_position('right')
-            self.cb.ax.yaxis.set_label_coords(1.25, .5)
-            self.cb.ax.yaxis.tick_left()
-            self.cb.ax.tick_params(axis='y', direction='in')
+                # normalize the colors
+                norms = colors.BoundaryNorm(bounds, mt_seg_bl2wh2rd.N)
+
+                # make the colorbar
+                self.cb = mcb.ColorbarBase(lpax2,
+                                           cmap=mt_seg_bl2wh2rd,
+                                           norm=norms,
+                                           orientation=self.cb_orientation,
+                                           ticks=bounds[1:-1])
+            else:
+                if cmap in list(mtcl.cmapdict.keys()):
+                    cmap_input = mtcl.cmapdict[cmap]
+                else:
+                    cmap_input = mtcl.cm.get_cmap(cmap)
+                self.cb = mcb.ColorbarBase(lpax2,
+                                           cmap=cmap_input,  # mtcl.cmapdict[cmap],
+                                           norm=colors.Normalize(vmin=ckmin,
+                                                                 vmax=ckmax),
+                                           orientation=self.cb_orientation)
+
+            # label the color bar accordingly
+            self.cb.set_label(mtpl.ckdict[ck],
+                              fontdict={'size': self.font_size})
+
+            self.cb.outline.set_linewidth(0.5)
+
+            # place the label in the correct location
+            if self.cb_orientation == 'horizontal':
+                self.cb.ax.xaxis.set_label_position('top')
+                self.cb.ax.xaxis.set_label_coords(.5, 1.3)
+
+            elif self.cb_orientation == 'vertical':
+                self.cb.ax.yaxis.set_label_position('right')
+                self.cb.ax.yaxis.set_label_coords(1.25, .5)
+                self.cb.ax.yaxis.tick_left()
+                self.cb.ax.tick_params(axis='y', direction='in')
 
         # --> add reference ellipse:  (legend of ellipse size=1)
         # FZ: remove the following section if no show of Phi
@@ -1286,7 +1311,7 @@ class PlotPhaseTensorMaps(mtpl.PlotSettings):
 
             path2savefile = save_fn
             self.fig.savefig(path2savefile, dpi=fig_dpi, format=file_format,
-                             orientation=orientation, bbox_inches='tight')
+                             orientation=orientation, bbox_inches='tight', transparent = self.transparent_backgr)
             # plt.clf()
             # plt.close(self.fig)
 
